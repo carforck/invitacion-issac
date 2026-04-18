@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Baby Shower · Isaac Buelvas Mier</title>
+
+  <link rel="preload" href="public/portada.png"  as="image"/>
+  <link rel="preload" href="public/portada2.png" as="image"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <style>
+    /* ══ PALETA SAFARI ISAAC ═══════════════════════════════ */
+    :root {
+      --cream:  #F9F7F2;
+      --brown:  #6B4F3B;
+      --terra:  #D9A081;
+      --orange: #FFB385;
+      --sage:   #94A684;
+      --forest: #4A5D4E;
+      --gold:   #EBC06D;
+      --pink:   #F2C6C2;
+    }
+
+    /* ══ RESET & BASE ══════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+    body {
+      height: 100%; width: 100%;
+      overflow: hidden;
+      background: var(--cream);
+      font-family: 'Lato', sans-serif;
+      color: var(--brown);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ══ SCREENS — base compartida ═════════════════════════ */
+    .screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      background: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Imagen full-screen contenida (sin recorte) */
+    .full-img {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      max-width: 100%; max-height: 100%;
+      width: auto; height: auto;
+      object-fit: contain;
+      display: block;
+      z-index: 0;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Overlay cálido en la parte inferior */
+    .overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        transparent          0%,
+        transparent         42%,
+        rgba(74,93,78,.15)  60%,
+        rgba(107,79,59,.55) 78%,
+        rgba(107,79,59,.82) 100%
+      );
+    }
+
+    /* Partículas */
+    .ptc-layer {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    @keyframes float-up {
+      0%   { transform: translateY(108vh) rotate(0deg);   opacity: 0; }
+      7%   { opacity: .6; }
+      93%  { opacity: .6; }
+      100% { transform: translateY(-8vh)  rotate(360deg); opacity: 0; }
+    }
+    .ptc {
+      position: absolute;
+      pointer-events: none;
+      will-change: transform;
+      animation: float-up linear infinite;
+    }
+
+    /* Contenido inferior de cada pantalla */
+    .screen-content {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 clamp(20px,6vw,44px) clamp(50px,10vh,82px);
+      text-align: center;
+      pointer-events: none;
+    }
+
+    /* Título pantalla */
+    .sc-title {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(2.8rem, 12vw, 5.5rem);
+      font-weight: 700;
+      color: var(--cream);
+      line-height: 1;
+      text-shadow: 0 2px 22px rgba(0,0,0,.5);
+      margin-bottom: 5px;
+    }
+    .sc-sub {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(.78rem, 2.6vw, 1rem);
+      color: rgba(249,247,242,.88);
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      text-shadow: 0 1px 8px rgba(0,0,0,.45);
+      margin-bottom: clamp(30px,6vh,52px);
+    }
+
+    /* ── Indicador de toque (anillo pulsante) ── */
+    .tap-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .ring {
+      position: relative;
+      width: 56px; height: 56px;
+    }
+    .ring::before, .ring::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      border-radius: 50%;
+      border: 2px solid rgba(235,192,109,.85);
+      animation: ring-anim 2.6s ease-out infinite;
+    }
+    .ring::after { animation-delay: 1.3s; }
+    @keyframes ring-anim {
+      0%   { transform: scale(.5);  opacity: .9; }
+      100% { transform: scale(2.5); opacity: 0;  }
+    }
+    .ring-dot {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 16px rgba(235,192,109,.75);
+    }
+    .tap-label {
+      font-family: 'Lato', sans-serif;
+      font-size: .68rem;
+      font-weight: 300;
+      letter-spacing: .3em;
+      text-transform: uppercase;
+      color: rgba(249,247,242,.7);
+      text-shadow: 0 1px 6px rgba(0,0,0,.4);
+    }
+
+    /* ── Aviso de sonido ── */
+    #snd-hint {
+      position: fixed;
+      top: 18px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 60;
+      display: none;
+      align-items: center;
+      gap: 7px;
+      background: rgba(107,79,59,.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: var(--cream);
+      font-family: 'Lato', sans-serif;
+      font-size: .72rem;
+      padding: 9px 20px;
+      border-radius: 24px;
+      border: 1px solid rgba(235,192,109,.45);
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0,0,0,.25);
+      pointer-events: auto;
+    }
+
+    /* z-index por pantalla */
+    #s1 { z-index: 20; }
+    #s2 { z-index: 10; display: none; }
+
+
+    /* ══ MODAL INFO (Bottom sheet mobile / Card desktop) ═══ */
+    #info-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 90;
+      display: none;
+      align-items: flex-end;       /* bottom sheet en mobile */
+      justify-content: center;
+    }
+    @media (min-width: 600px) {
+      #info-modal { align-items: center; padding: 20px; }
+    }
+
+    .info-bd {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      /* Poca opacidad para que portada2 se vea de fondo, blur la difumina */
+      background: rgba(107,79,59,.30);
+      backdrop-filter: blur(14px) brightness(.88);
+      -webkit-backdrop-filter: blur(14px) brightness(.88);
+    }
+
+    .info-sheet {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 480px;
+      max-height: 91vh;
+      background: var(--cream);
+      border-radius: 28px 28px 0 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      box-shadow: 0 -12px 50px rgba(107,79,59,.28), 0 -2px 8px rgba(0,0,0,.08);
+    }
+    @media (min-width: 600px) {
+      .info-sheet {
+        border-radius: 28px;
+        max-height: 88vh;
+        box-shadow: 0 28px 70px rgba(107,79,59,.3);
+      }
+    }
+    .info-sheet::-webkit-scrollbar { width: 3px; }
+    .info-sheet::-webkit-scrollbar-thumb { background: rgba(217,160,129,.4); border-radius: 2px; }
+
+    /* Handle (barra de arrastre mobile) */
+    .sheet-handle {
+      width: 40px; height: 4px;
+      background: rgba(107,79,59,.2);
+      border-radius: 2px;
+      margin: 12px auto 4px;
+    }
+    @media (min-width: 600px) { .sheet-handle { display: none; } }
+
+    /* Botón cerrar */
+    .btn-close-info {
+      position: absolute;
+      top: 14px; right: 16px;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 1px solid rgba(217,160,129,.45);
+      background: rgba(217,160,129,.15);
+      color: var(--brown);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
+      z-index: 1;
+    }
+    .btn-close-info:hover { background: rgba(217,160,129,.3); }
+
+    /* Cuerpo del modal */
+    .info-body {
+      padding: 0 clamp(20px,6vw,32px) clamp(28px,5vh,40px);
+      text-align: center;
+    }
+
+    /* ── Biberón badge ── */
+    @keyframes baby-sway {
+      0%,100% { transform: rotate(-7deg) translateY(0); }
+      50%      { transform: rotate( 7deg) translateY(-5px); }
+    }
+    .baby-badge {
+      width: 74px; height: 74px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, var(--orange) 0%, var(--terra) 55%, var(--gold) 100%);
+      border: 3px solid rgba(235,192,109,.55);
+      box-shadow: 0 8px 24px rgba(217,160,129,.45), inset 0 1px 0 rgba(255,255,255,.35);
+      display: flex; align-items: center; justify-content: center;
+      margin: 16px auto 14px;
+      animation: baby-sway 3.8s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    .baby-badge svg { width: 38px; height: 38px; filter: drop-shadow(0 1px 3px rgba(107,79,59,.28)); }
+
+    /* Tipografía modal */
+    .t-main {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(2rem, 8vw, 2.8rem);
+      font-weight: 700;
+      color: var(--brown);
+      line-height: 1;
+    }
+    .t-label {
+      font-family: 'Lato', sans-serif;
+      font-size: clamp(.58rem, 1.8vw, .66rem);
+      font-weight: 700;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--sage);
+    }
+    .t-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.45rem, 5vw, 1.95rem);
+      font-weight: 700;
+      color: var(--brown);
+      line-height: 1.15;
+    }
+    .t-msg {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(.84rem, 2.7vw, .99rem);
+      color: rgba(107,79,59,.75);
+      line-height: 1.65;
+    }
+
+    /* Estrellas */
+    @keyframes twinkle {
+      0%,100% { opacity: .2; transform: scale(.65); }
+      50%      { opacity: 1;  transform: scale(1.3); }
+    }
+    .star { display: inline-block; animation: twinkle 2.6s ease-in-out infinite; }
+    .star:nth-child(2) { animation-delay: .87s; }
+    .star:nth-child(3) { animation-delay: 1.73s; }
+
+    /* Divisor */
+    .divider {
+      display: flex; align-items: center; gap: 10px;
+      margin: clamp(10px,2vh,14px) 0;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: .6;
+    }
+
+    /* Filas info */
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: clamp(10px,2.5vw,14px);
+      padding: clamp(9px,2vw,12px) clamp(11px,2.8vw,15px);
+      border-radius: 13px;
+      background: linear-gradient(135deg, rgba(249,247,242,1) 0%, rgba(242,198,194,.18) 100%);
+      border: 1px solid rgba(217,160,129,.24);
+      margin-bottom: 8px;
+      text-align: left;
+    }
+    .info-icon { font-size: clamp(1.05rem,3.2vw,1.2rem); min-width: 22px; padding-top: 3px; }
+    .info-val {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(.82rem,2.6vw,.95rem);
+      font-weight: 600; color: var(--brown); line-height: 1.3;
+    }
+    .info-sub { font-family: 'Lato', sans-serif; font-size: .72rem; color: var(--terra); margin-top: 2px; }
+
+    /* Badges */
+    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px clamp(12px,3vw,17px); border-radius: 22px;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(.82rem,2.6vw,.9rem);
+      color: var(--brown);
+    }
+    .b-terra { background: rgba(217,160,129,.12); border: 1px solid rgba(217,160,129,.38); }
+    .b-sage  { background: rgba(148,166,132,.14); border: 1px solid rgba(148,166,132,.35); }
+
+    /* Botón mapa */
+    #btn-map {
+      display: block; width: 100%; min-height: 48px;
+      padding: clamp(12px,2.8vw,15px) 20px;
+      border: none; border-radius: 50px;
+      background: var(--terra); color: var(--cream);
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(.86rem,2.7vw,.95rem);
+      letter-spacing: .07em; cursor: pointer;
+      box-shadow: 0 5px 22px rgba(217,160,129,.42);
+      transition: background .25s, transform .22s, box-shadow .22s;
+    }
+    #btn-map:hover  { background: var(--orange); box-shadow: 0 7px 26px rgba(255,179,133,.5); transform: translateY(-2px); }
+    #btn-map:active { transform: translateY(1px); }
+
+
+    /* ══ MODAL MAPA ════════════════════════════════════════ */
+    #map-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .map-bd {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(74,93,78,.72);
+      backdrop-filter: blur(7px);
+      -webkit-backdrop-filter: blur(7px);
+    }
+    .map-box {
+      position: relative; z-index: 10;
+      width: 100%; max-width: 500px;
+      background: var(--cream);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 28px 70px rgba(107,79,59,.32);
+    }
+    .map-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px;
+      background: linear-gradient(135deg, rgba(217,160,129,.28), rgba(235,192,109,.18));
+      border-bottom: 1px solid rgba(217,160,129,.22);
+    }
+    .map-head h3 { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 600; color: var(--brown); }
+    .map-head p  { font-size: .74rem; color: var(--terra); margin-top: 2px; }
+    .btn-x {
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 1px solid rgba(217,160,129,.45);
+      background: rgba(217,160,129,.15);
+      color: var(--brown); font-size: 1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
+    }
+    .btn-x:hover { background: rgba(217,160,129,.3); }
+    .map-wrap { height: clamp(240px,45vw,320px); }
+    .map-wrap iframe { display: block; width: 100%; height: 100%; border: 0; }
+    .map-foot {
+      padding: 12px 16px;
+      border-top: 1px solid rgba(217,160,129,.2);
+      display: flex; justify-content: center;
+    }
+    .a-maps {
+      display: inline-flex; align-items: center; gap: 6px; min-height: 40px;
+      font-family: 'Lato', sans-serif; font-size: .82rem;
+      color: var(--brown); text-decoration: none;
+      background: linear-gradient(135deg, rgba(217,160,129,.14), rgba(235,192,109,.14));
+      border: 1px solid rgba(217,160,129,.38);
+      padding: 8px 20px; border-radius: 22px;
+      transition: transform .2s;
+    }
+    .a-maps:hover { transform: translateY(-1px); }
+
+
+    /* ══ FAB MÚSICA ════════════════════════════════════════ */
+    @keyframes eq {
+      0%,100% { transform: scaleY(.3); }
+      50%      { transform: scaleY(1); }
+    }
+    #fab {
+      position: fixed;
+      bottom: clamp(16px,4vw,22px); right: clamp(16px,4vw,22px);
+      z-index: 70;
+      width: 48px; height: 48px; border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--terra), var(--gold));
+      box-shadow: 0 5px 18px rgba(217,160,129,.5);
+      cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      transition: transform .22s;
+    }
+    #fab:hover  { transform: scale(1.12); }
+    #fab:active { transform: scale(.92); }
+    .eq-wrap { display: flex; align-items: flex-end; gap: 2.5px; height: 16px; }
+    .eq-b { width: 3px; border-radius: 2px; background: rgba(249,247,242,.92); animation: eq ease-in-out infinite; }
+    .eq-b:nth-child(1) { height: 8px;  animation-duration: .68s; }
+    .eq-b:nth-child(2) { height: 14px; animation-duration: .92s; animation-delay: .10s; }
+    .eq-b:nth-child(3) { height: 6px;  animation-duration: .58s; animation-delay: .20s; }
+    .eq-b:nth-child(4) { height: 11px; animation-duration: .80s; animation-delay: .05s; }
+    #fab.muted { background: rgba(107,79,59,.45); box-shadow: none; }
+    #fab.muted .eq-wrap { opacity: .28; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     PANTALLA 1 · portada.png  (toca → Pantalla 2)
+══════════════════════════════════════════════════════ -->
+<div id="s1" class="screen">
+  <img class="full-img" src="public/portada.png" alt="Baby Shower" draggable="false"/>
+  <div class="ptc-layer" id="ptc1"></div>
+  <div class="overlay"></div>
+  <div id="snd-hint" role="button">🔊 Toca para activar el sonido</div>
+  <div class="screen-content">
+    <h1 id="p-title" class="sc-title">Baby Shower</h1>
+    <p  id="p-name"  class="sc-sub">Isaac Buelvas Mier</p>
+    <div id="p-tap" class="tap-wrap">
+      <div class="ring"><div class="ring-dot"></div></div>
+      <span class="tap-label">Toca para descubrir</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     PANTALLA 2 · portada2.png  (fondo difuminado del modal)
+══════════════════════════════════════════════════════ -->
+<div id="s2" class="screen">
+  <img class="full-img" src="public/portada2.png" alt="Baby Shower Isaac" draggable="false"/>
+  <div class="ptc-layer" id="ptc2"></div>
+  <div class="overlay"></div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL INFO  (Bottom sheet mobile / card desktop)
+══════════════════════════════════════════════════════ -->
+<div id="info-modal">
+  <div class="info-bd" id="info-bd"></div>
+  <div class="info-sheet" id="info-sheet">
+
+    <div class="sheet-handle"></div>
+    <button class="btn-close-info" id="btn-close-info" aria-label="Cerrar">✕</button>
+
+    <div class="info-body">
+
+      <!-- Biberón badge -->
+      <div class="baby-badge">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 74" fill="none">
+          <ellipse cx="25" cy="8" rx="8.5" ry="6.5" fill="#6B4F3B" opacity=".82"/>
+          <rect x="13" y="12" width="24" height="8" rx="4" fill="#6B4F3B" opacity=".65"/>
+          <rect x="18.5" y="17" width="13" height="10" rx="3.5" fill="#FFB385"/>
+          <rect x="9" y="25" width="32" height="44" rx="16" fill="#FFB385"/>
+          <rect x="11" y="49" width="28" height="18" rx="14" fill="rgba(249,247,242,.7)"/>
+          <line x1="36" y1="34" x2="41" y2="34" stroke="rgba(107,79,59,.32)" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="36" y1="41" x2="41" y2="41" stroke="rgba(107,79,59,.32)" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="36" y1="48" x2="41" y2="48" stroke="rgba(107,79,59,.32)" stroke-width="1.8" stroke-linecap="round"/>
+          <ellipse cx="18" cy="35" rx="3" ry="7.5" fill="rgba(255,255,255,.28)" transform="rotate(-12 18 35)"/>
+        </svg>
+      </div>
+
+      <!-- Estrellas -->
+      <div style="margin-bottom:8px;">
+        <span class="star" style="color:var(--gold);font-size:.68rem;">✦</span>
+        <span class="star" style="color:var(--terra);font-size:.92rem;margin:0 10px;">✦</span>
+        <span class="star" style="color:var(--gold);font-size:.68rem;">✦</span>
+      </div>
+
+      <h2 class="t-main" style="margin-bottom:2px;">Baby Shower</h2>
+
+      <div class="divider"><span style="font-size:.7rem;">🌿</span></div>
+
+      <p class="t-label" style="margin-bottom:5px;">En honor a</p>
+      <h3 class="t-name" style="margin-bottom:11px;">Isaac Buelvas Mier</h3>
+      <p class="t-msg" style="padding:0 4px;margin-bottom:4px;">
+        "Acompáñanos a celebrar este día tan especial"
+      </p>
+
+      <div class="divider"><span style="font-size:.7rem;">⭐</span></div>
+
+      <div style="margin-bottom:4px;">
+        <div class="info-row">
+          <span class="info-icon">📅</span>
+          <div>
+            <div class="t-label">Fecha</div>
+            <div class="info-val">Sábado · 30 Mayo · 2026</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-icon">⏰</span>
+          <div>
+            <div class="t-label">Hora</div>
+            <div class="info-val">6:00 PM — 9:00 PM</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-icon">📍</span>
+          <div>
+            <div class="t-label">Lugar</div>
+            <div class="info-val">Restaurante Rica Brasa</div>
+            <div class="info-sub">Crisanto Luque</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"><span style="font-size:.7rem;">🎀</span></div>
+
+      <div class="badge-row" style="margin-bottom:22px;">
+        <span class="badge b-terra">💰 Aporte: $20.000</span>
+        <span class="badge b-sage">💌 Lluvia de sobres</span>
+      </div>
+
+      <button id="btn-map">📍 &nbsp; Ver Ubicación</button>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL MAPA
+══════════════════════════════════════════════════════ -->
+<div id="map-modal">
+  <div class="map-bd" id="map-bd"></div>
+  <div class="map-box" id="map-box">
+    <div class="map-head">
+      <div>
+        <h3>📍 Restaurante Rica Brasa</h3>
+        <p>Crisanto Luque</p>
+      </div>
+      <button class="btn-x" id="map-close" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="map-wrap">
+      <iframe id="map-if" src="about:blank" allowfullscreen
+        referrerpolicy="no-referrer-when-downgrade" title="Mapa Rica Brasa"></iframe>
+    </div>
+    <div class="map-foot">
+      <a href="https://maps.app.goo.gl/UKRxNycPFPcKcfuZ7" target="_blank"
+         rel="noopener noreferrer" class="a-maps">
+        🗺️ &nbsp; Abrir en Google Maps
+      </a>
+    </div>
+  </div>
+</div>
+
+
+<!-- FAB música -->
+<button id="fab" aria-label="Silenciar música">
+  <div class="eq-wrap">
+    <div class="eq-b"></div><div class="eq-b"></div>
+    <div class="eq-b"></div><div class="eq-b"></div>
+  </div>
+</button>
+
+<!-- Anchor YT -->
+<div id="yt-root" style="position:fixed;bottom:-999px;left:-999px;
+  width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none;"></div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════════════════════ -->
+<script>
+/* ══ Constantes ═══════════════════════════════════════ */
+const VID     = 'b9nxnU1GkTg';
+const MAP_URL = 'https://maps.google.com/maps?q=Restaurante+Rica+Brasa+Crisanto+Luque&output=embed&hl=es';
+
+/* ══ Partículas ═══════════════════════════════════════ */
+const SYMS = ['🌿','⭐','🍃','✦','🌸','🦋','🌼','✨','🌱'];
+function spawnPtc(id, n) {
+  const w = document.getElementById(id);
+  for (let i = 0; i < n; i++) {
+    const el = document.createElement('div');
+    el.className = 'ptc';
+    el.textContent = SYMS[i % SYMS.length];
+    const dur = 12 + Math.random() * 18;
+    el.style.cssText = `left:${Math.random()*100}%;font-size:${.45+Math.random()*.8}rem;opacity:0;
+      animation-name:float-up;animation-duration:${dur}s;animation-delay:-${Math.random()*dur}s;
+      animation-timing-function:linear;animation-iteration-count:infinite;`;
+    w.appendChild(el);
+  }
+}
+spawnPtc('ptc1', 22);
+spawnPtc('ptc2', 18);
+
+
+/* ══ YouTube Audio ════════════════════════════════════ */
+let ytPlayer, ytApiReady = false, musicOn = false, muted = false;
+
+function loadYTApi() {
+  const t = document.createElement('script');
+  t.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(t);
+}
+
+window.onYouTubeIframeAPIReady = function () {
+  ytApiReady = true;
+  ytPlayer = new YT.Player('yt-root', {
+    height: '1', width: '1', videoId: VID,
+    playerVars: { autoplay:1, controls:0, disablekb:1, loop:1, playlist:VID, modestbranding:1, rel:0, fs:0, iv_load_policy:3 },
+    events: {
+      onReady: e => { try { e.target.playVideo(); e.target.setVolume(68); } catch(_){} },
+      onStateChange: e => {
+        if (e.data === YT.PlayerState.PLAYING && !musicOn) {
+          musicOn = true; hideSoundHint(); showFAB();
+        }
+      },
+      onError: () => injectFallback()
+    }
+  });
+};
+
+function injectFallback() {
+  if (document.getElementById('yt-fb')) return;
+  const f = document.createElement('iframe');
+  f.id = 'yt-fb'; f.allow = 'autoplay; encrypted-media';
+  f.src = `https://www.youtube.com/embed/${VID}?autoplay=1&loop=1&playlist=${VID}&controls=0&mute=0&fs=0&rel=0&iv_load_policy=3&modestbranding=1`;
+  f.style.cssText = 'position:fixed;bottom:-999px;left:-999px;width:1px;height:1px;opacity:0;pointer-events:none;border:0;';
+  document.body.appendChild(f);
+}
+
+function startMusic() {
+  if (musicOn) return;
+  musicOn = true;
+  if (ytApiReady && ytPlayer) {
+    try { ytPlayer.playVideo(); ytPlayer.setVolume(68); }
+    catch(_) { injectFallback(); }
+  } else { injectFallback(); }
+  showFAB();
+}
+
+function showFAB() {
+  const fab = document.getElementById('fab');
+  fab.style.display = 'flex';
+  gsap.fromTo(fab, { scale:0, opacity:0 }, { scale:1, opacity:1, duration:.55, delay:.5, ease:'back.out(1.7)' });
+}
+function hideSoundHint() {
+  const h = document.getElementById('snd-hint');
+  gsap.to(h, { opacity:0, duration:.4, onComplete: () => h.style.display = 'none' });
+}
+
+document.getElementById('snd-hint').addEventListener('click', e => {
+  e.stopPropagation(); startMusic(); hideSoundHint();
+});
+
+document.getElementById('fab').addEventListener('click', e => {
+  e.stopPropagation();
+  muted = !muted;
+  const fab = document.getElementById('fab');
+  fab.classList.toggle('muted', muted);
+  if (ytApiReady && ytPlayer) { muted ? ytPlayer.mute() : ytPlayer.unMute(); }
+  else {
+    ['yt-fb'].forEach(id => { const el = document.getElementById(id); if(el) el.remove(); });
+    if (!muted) injectFallback();
+  }
+});
+
+
+/* ══ Animaciones DOMContentLoaded ════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  loadYTApi();
+
+  setTimeout(() => {
+    if (!musicOn) {
+      const h = document.getElementById('snd-hint');
+      h.style.display = 'flex';
+      gsap.fromTo(h, { y:-12, opacity:0 }, { y:0, opacity:1, duration:.5 });
+    }
+  }, 3000);
+
+  gsap.fromTo('#s1',      { opacity:0 }, { opacity:1, duration:1.7, ease:'power2.out' });
+  gsap.fromTo('#p-title', { y:32, opacity:0 }, { y:0, opacity:1, duration:1.1, delay:.55, ease:'back.out(1.5)' });
+  gsap.fromTo('#p-name',  { y:20, opacity:0 }, { y:0, opacity:1, duration:1.0, delay:.90, ease:'power2.out' });
+  gsap.fromTo('#p-tap',   { y:14, opacity:0 }, { y:0, opacity:1, duration:.9,  delay:1.35, ease:'power2.out' });
+});
+
+
+/* ══ Transición S1 → S2 + apertura automática del modal ═ */
+let transitioning = false;
+
+function goToS2() {
+  if (transitioning) return;
+  transitioning = true;
+  hideSoundHint();
+  startMusic();
+
+  gsap.to(['#p-title','#p-name','#p-tap'], { y:-24, opacity:0, duration:.38, stagger:.06, ease:'power2.in' });
+  gsap.to('#s1', {
+    opacity:0, scale:1.06, duration:.88, delay:.18, ease:'power2.inOut',
+    onComplete: () => {
+      document.getElementById('s1').style.display = 'none';
+      const s2 = document.getElementById('s2');
+      s2.style.display = 'flex';
+      // Pantalla 2 aparece y el modal se abre inmediatamente encima
+      gsap.fromTo(s2, { opacity:0 }, {
+        opacity:1, duration:.45, ease:'power2.out',
+        onComplete: openInfoModal   // modal abre solo, sin botón
+      });
+    }
+  });
+}
+
+document.getElementById('s1').addEventListener('click', goToS2);
+document.getElementById('s1').addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') goToS2(); });
+
+
+/* ══ Modal Información ═══════════════════════════════ */
+const infoModal = document.getElementById('info-modal');
+const infoSheet = document.getElementById('info-sheet');
+
+function openInfoModal() {
+  infoModal.style.display = 'flex';
+  gsap.fromTo('.info-bd',  { opacity:0 }, { opacity:1, duration:.3 });
+  gsap.fromTo(infoSheet,
+    { y: window.innerWidth < 600 ? 300 : 40, opacity:0, scale: window.innerWidth < 600 ? 1 : 0.88 },
+    { y:0, opacity:1, scale:1, duration:.45, ease:'back.out(1.5)' }
+  );
+}
+
+function closeInfoModal() {
+  const isM = window.innerWidth < 600;
+  gsap.to(infoSheet, { y: isM ? 300 : 30, opacity:0, scale: isM ? 1 : 0.88, duration:.28, ease:'power2.in' });
+  gsap.to('.info-bd', { opacity:0, duration:.28, onComplete: () => { infoModal.style.display='none'; } });
+}
+
+document.getElementById('info-bd').addEventListener('click', closeInfoModal);
+document.getElementById('btn-close-info').addEventListener('click', closeInfoModal);
+infoSheet.addEventListener('click', e => e.stopPropagation());
+
+
+/* ══ Modal Mapa ══════════════════════════════════════ */
+const mapModal = document.getElementById('map-modal');
+const mapBox   = document.getElementById('map-box');
+
+function openMapModal() {
+  const iframe = document.getElementById('map-if');
+  if (iframe.src === 'about:blank') iframe.src = MAP_URL;
+  mapModal.style.display = 'flex';
+  gsap.fromTo('.map-bd', { opacity:0 }, { opacity:1, duration:.3 });
+  gsap.fromTo(mapBox, { scale:.82, opacity:0, y:20 }, { scale:1, opacity:1, y:0, duration:.4, ease:'back.out(1.8)' });
+}
+
+function closeMapModal() {
+  gsap.to(mapBox,    { scale:.9, opacity:0, duration:.22, ease:'power2.in' });
+  gsap.to('.map-bd', { opacity:0, duration:.22, onComplete: () => { mapModal.style.display='none'; } });
+}
+
+document.getElementById('btn-map').addEventListener('click', openMapModal);
+document.getElementById('map-close').addEventListener('click', closeMapModal);
+document.getElementById('map-bd').addEventListener('click', closeMapModal);
+mapBox.addEventListener('click', e => e.stopPropagation());
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (mapModal.style.display === 'flex') closeMapModal();
+    else if (infoModal.style.display === 'flex') closeInfoModal();
+  }
+});
+</script>
+
+</body>
+</html>
