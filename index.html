@@ -619,31 +619,31 @@ document.getElementById('fab').addEventListener('click', e => {
 
 
 /* ══ PRIMERA INTERACCIÓN → música inmediata ═══════════
-   wheel / touchstart / keydown son gestos válidos para
-   desbloquear el autoplay de audio en todos los browsers */
+   Gestos válidos para desbloquear autoplay de audio:
+   pointerdown, click, touchstart, keydown
+   ⚠ wheel NO es un user-activation gesture en los browsers */
 function onFirstInteraction() {
+  if (musicOn) return;
   startMusic();
-  document.removeEventListener('wheel',      onFirstInteraction);
-  document.removeEventListener('touchstart', onFirstInteraction);
-  document.removeEventListener('keydown',    onFirstInteraction);
 }
-document.addEventListener('wheel',      onFirstInteraction, { passive: true, once: true });
-document.addEventListener('touchstart', onFirstInteraction, { passive: true, once: true });
-document.addEventListener('keydown',    onFirstInteraction, { once: true });
+document.addEventListener('pointerdown', onFirstInteraction, { once: true });
+document.addEventListener('click',       onFirstInteraction, { once: true });
+document.addEventListener('touchstart',  onFirstInteraction, { passive: true, once: true });
+document.addEventListener('keydown',     onFirstInteraction, { once: true });
 
 
 /* ══ ENTRADA GSAP ════════════════════════════════════= */
 window.addEventListener('DOMContentLoaded', () => {
   loadYTApi();
 
-  /* Mostrar aviso de sonido si tras 4s no arrancó */
+  /* Mostrar aviso de sonido a los 1.5s si no arrancó solo */
   setTimeout(() => {
     if (!musicOn) {
       const h = document.getElementById('snd-hint');
       h.style.display = 'flex';
       gsap.fromTo(h, { y:-12, opacity:0 }, { y:0, opacity:1, duration:.5 });
     }
-  }, 4000);
+  }, 1500);
 
   gsap.fromTo('#s1 .full-img', { opacity:0 }, { opacity:1, duration:1.6, ease:'power2.out' });
   gsap.fromTo('#p-title', { y:30, opacity:0 }, { y:0, opacity:1, duration:1.1, delay:.6,  ease:'back.out(1.5)' });
