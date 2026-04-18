@@ -27,33 +27,45 @@
       --pink:   #F2C6C2;
     }
 
-    /* ══ RESET & BASE ══════════════════════════════════════ */
+    /* ══ RESET ═════════════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { height: 100%; }
-    body {
-      height: 100%; width: 100%;
-      overflow: hidden;
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;       /* el scroll lo maneja #scroller */
       background: var(--cream);
       font-family: 'Lato', sans-serif;
       color: var(--brown);
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ══ SCREENS — base compartida ═════════════════════════ */
-    .screen {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      cursor: pointer;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
+    /* ══ SCROLL CONTAINER ══════════════════════════════════
+       Dos slides full-viewport, snapping suave vertical      */
+    #scroller {
+      height: 100vh;
+      width: 100vw;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+    /* Ocultar scrollbar pero mantener funcionalidad */
+    #scroller::-webkit-scrollbar { display: none; }
+    #scroller { scrollbar-width: none; }
+
+    /* ══ SLIDES ════════════════════════════════════════════ */
+    .slide {
+      height: 100vh;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;   /* no saltar slides de un solo gesto */
       background: var(--cream);
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
-    /* Imagen full-screen contenida (sin recorte) */
+    /* Imagen full-screen contenida */
     .full-img {
       position: absolute;
       top: 50%; left: 50%;
@@ -65,62 +77,60 @@
       z-index: 0;
       pointer-events: none;
       user-select: none;
+      /* Animación suave de escala al entrar */
+      transition: transform 0.8s ease;
     }
 
-    /* Overlay cálido en la parte inferior */
+    /* Overlay cálido inferior */
     .overlay {
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
+      inset: 0;
       z-index: 1;
       pointer-events: none;
       background: linear-gradient(
         to bottom,
-        transparent          0%,
-        transparent         42%,
-        rgba(74,93,78,.15)  60%,
-        rgba(107,79,59,.55) 78%,
-        rgba(107,79,59,.82) 100%
+        transparent         0%,
+        transparent        42%,
+        rgba(74,93,78,.14) 60%,
+        rgba(107,79,59,.52) 78%,
+        rgba(107,79,59,.80) 100%
       );
     }
 
-    /* Partículas */
+    /* ── Partículas ── */
     .ptc-layer {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      inset: 0;
       overflow: hidden;
       pointer-events: none;
       z-index: 2;
     }
-
     @keyframes float-up {
       0%   { transform: translateY(108vh) rotate(0deg);   opacity: 0; }
-      7%   { opacity: .6; }
-      93%  { opacity: .6; }
-      100% { transform: translateY(-8vh)  rotate(360deg); opacity: 0; }
+      7%   { opacity: .55; }
+      93%  { opacity: .55; }
+      100% { transform: translateY(-8vh) rotate(360deg); opacity: 0; }
     }
     .ptc {
       position: absolute;
       pointer-events: none;
-      will-change: transform;
       animation: float-up linear infinite;
     }
 
-    /* Contenido inferior de cada pantalla */
-    .screen-content {
+    /* ── Contenido inferior del slide ── */
+    .slide-content {
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
+      inset: 0;
       z-index: 3;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-end;
-      padding: 0 clamp(20px,6vw,44px) clamp(50px,10vh,82px);
+      padding: 0 clamp(20px,6vw,44px) clamp(44px,9vh,72px);
       text-align: center;
       pointer-events: none;
     }
 
-    /* Título pantalla */
     .sc-title {
       font-family: 'Dancing Script', cursive;
       font-size: clamp(2.8rem, 12vw, 5.5rem);
@@ -137,58 +147,54 @@
       letter-spacing: .28em;
       text-transform: uppercase;
       text-shadow: 0 1px 8px rgba(0,0,0,.45);
-      margin-bottom: clamp(30px,6vh,52px);
+      margin-bottom: clamp(28px,6vh,50px);
     }
 
-    /* ── Indicador de toque (anillo pulsante) ── */
-    .tap-wrap {
+    /* ── Scroll hint (reemplaza el toque) ── */
+    .scroll-hint {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
-    .ring {
-      position: relative;
-      width: 56px; height: 56px;
-    }
-    .ring::before, .ring::after {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      border-radius: 50%;
-      border: 2px solid rgba(235,192,109,.85);
-      animation: ring-anim 2.6s ease-out infinite;
-    }
-    .ring::after { animation-delay: 1.3s; }
-    @keyframes ring-anim {
-      0%   { transform: scale(.5);  opacity: .9; }
-      100% { transform: scale(2.5); opacity: 0;  }
-    }
-    .ring-dot {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%,-50%);
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      background: var(--gold);
-      box-shadow: 0 0 16px rgba(235,192,109,.75);
-    }
-    .tap-label {
+    .scroll-hint-label {
       font-family: 'Lato', sans-serif;
       font-size: .68rem;
       font-weight: 300;
       letter-spacing: .3em;
       text-transform: uppercase;
-      color: rgba(249,247,242,.7);
+      color: rgba(249,247,242,.68);
       text-shadow: 0 1px 6px rgba(0,0,0,.4);
     }
+    /* Indicador de scroll: cápsula con punto que baja */
+    .scroll-pill {
+      width: 26px; height: 44px;
+      border: 2px solid rgba(235,192,109,.75);
+      border-radius: 13px;
+      display: flex;
+      justify-content: center;
+      padding-top: 6px;
+    }
+    .scroll-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 8px rgba(235,192,109,.8);
+      animation: scroll-drop 2s ease-in-out infinite;
+    }
+    @keyframes scroll-drop {
+      0%   { transform: translateY(0);    opacity: 1; }
+      60%  { transform: translateY(18px); opacity: 0; }
+      61%  { transform: translateY(0);    opacity: 0; }
+      100% { transform: translateY(0);    opacity: 1; }
+    }
 
-    /* ── Aviso de sonido ── */
+    /* Aviso de sonido */
     #snd-hint {
       position: fixed;
       top: 18px; left: 50%;
       transform: translateX(-50%);
-      z-index: 60;
+      z-index: 200;
       display: none;
       align-items: center;
       gap: 7px;
@@ -207,18 +213,14 @@
       pointer-events: auto;
     }
 
-    /* z-index por pantalla */
-    #s1 { z-index: 20; }
-    #s2 { z-index: 10; display: none; }
 
-
-    /* ══ MODAL INFO (Bottom sheet mobile / Card desktop) ═══ */
+    /* ══ MODAL INFO ════════════════════════════════════════ */
     #info-modal {
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
+      inset: 0;
       z-index: 90;
       display: none;
-      align-items: flex-end;       /* bottom sheet en mobile */
+      align-items: flex-end;
       justify-content: center;
     }
     @media (min-width: 600px) {
@@ -227,9 +229,8 @@
 
     .info-bd {
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      /* Poca opacidad para que portada2 se vea de fondo, blur la difumina */
-      background: rgba(107,79,59,.30);
+      inset: 0;
+      background: rgba(107,79,59,.28);
       backdrop-filter: blur(14px) brightness(.88);
       -webkit-backdrop-filter: blur(14px) brightness(.88);
     }
@@ -248,25 +249,19 @@
       box-shadow: 0 -12px 50px rgba(107,79,59,.28), 0 -2px 8px rgba(0,0,0,.08);
     }
     @media (min-width: 600px) {
-      .info-sheet {
-        border-radius: 28px;
-        max-height: 88vh;
-        box-shadow: 0 28px 70px rgba(107,79,59,.3);
-      }
+      .info-sheet { border-radius: 28px; max-height: 88vh; box-shadow: 0 28px 70px rgba(107,79,59,.3); }
     }
     .info-sheet::-webkit-scrollbar { width: 3px; }
     .info-sheet::-webkit-scrollbar-thumb { background: rgba(217,160,129,.4); border-radius: 2px; }
 
-    /* Handle (barra de arrastre mobile) */
     .sheet-handle {
       width: 40px; height: 4px;
-      background: rgba(107,79,59,.2);
+      background: rgba(107,79,59,.18);
       border-radius: 2px;
       margin: 12px auto 4px;
     }
     @media (min-width: 600px) { .sheet-handle { display: none; } }
 
-    /* Botón cerrar */
     .btn-close-info {
       position: absolute;
       top: 14px; right: 16px;
@@ -283,13 +278,12 @@
     }
     .btn-close-info:hover { background: rgba(217,160,129,.3); }
 
-    /* Cuerpo del modal */
     .info-body {
       padding: 0 clamp(20px,6vw,32px) clamp(28px,5vh,40px);
       text-align: center;
     }
 
-    /* ── Biberón badge ── */
+    /* Biberón badge */
     @keyframes baby-sway {
       0%,100% { transform: rotate(-7deg) translateY(0); }
       50%      { transform: rotate( 7deg) translateY(-5px); }
@@ -308,97 +302,46 @@
     .baby-badge svg { width: 38px; height: 38px; filter: drop-shadow(0 1px 3px rgba(107,79,59,.28)); }
 
     /* Tipografía modal */
-    .t-main {
-      font-family: 'Dancing Script', cursive;
-      font-size: clamp(2rem, 8vw, 2.8rem);
-      font-weight: 700;
-      color: var(--brown);
-      line-height: 1;
-    }
-    .t-label {
-      font-family: 'Lato', sans-serif;
-      font-size: clamp(.58rem, 1.8vw, .66rem);
-      font-weight: 700;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-      color: var(--sage);
-    }
-    .t-name {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(1.45rem, 5vw, 1.95rem);
-      font-weight: 700;
-      color: var(--brown);
-      line-height: 1.15;
-    }
-    .t-msg {
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: clamp(.84rem, 2.7vw, .99rem);
-      color: rgba(107,79,59,.75);
-      line-height: 1.65;
-    }
+    .t-main  { font-family: 'Dancing Script', cursive; font-size: clamp(2rem,8vw,2.8rem); font-weight: 700; color: var(--brown); line-height: 1; }
+    .t-label { font-family: 'Lato', sans-serif; font-size: clamp(.58rem,1.8vw,.66rem); font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--sage); }
+    .t-name  { font-family: 'Playfair Display', serif; font-size: clamp(1.45rem,5vw,1.95rem); font-weight: 700; color: var(--brown); line-height: 1.15; }
+    .t-msg   { font-family: 'Playfair Display', serif; font-style: italic; font-size: clamp(.84rem,2.7vw,.99rem); color: rgba(107,79,59,.75); line-height: 1.65; }
 
-    /* Estrellas */
     @keyframes twinkle {
       0%,100% { opacity: .2; transform: scale(.65); }
-      50%      { opacity: 1;  transform: scale(1.3); }
+      50%      { opacity: 1;  transform: scale(1.3);  }
     }
     .star { display: inline-block; animation: twinkle 2.6s ease-in-out infinite; }
     .star:nth-child(2) { animation-delay: .87s; }
     .star:nth-child(3) { animation-delay: 1.73s; }
 
-    /* Divisor */
-    .divider {
-      display: flex; align-items: center; gap: 10px;
-      margin: clamp(10px,2vh,14px) 0;
-    }
-    .divider::before, .divider::after {
-      content: ''; flex: 1; height: 1px;
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
-      opacity: .6;
-    }
+    .divider { display: flex; align-items: center; gap: 10px; margin: clamp(10px,2vh,14px) 0; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: .6; }
 
-    /* Filas info */
     .info-row {
-      display: flex;
-      align-items: flex-start;
+      display: flex; align-items: flex-start;
       gap: clamp(10px,2.5vw,14px);
       padding: clamp(9px,2vw,12px) clamp(11px,2.8vw,15px);
       border-radius: 13px;
       background: linear-gradient(135deg, rgba(249,247,242,1) 0%, rgba(242,198,194,.18) 100%);
       border: 1px solid rgba(217,160,129,.24);
-      margin-bottom: 8px;
-      text-align: left;
+      margin-bottom: 8px; text-align: left;
     }
     .info-icon { font-size: clamp(1.05rem,3.2vw,1.2rem); min-width: 22px; padding-top: 3px; }
-    .info-val {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(.82rem,2.6vw,.95rem);
-      font-weight: 600; color: var(--brown); line-height: 1.3;
-    }
-    .info-sub { font-family: 'Lato', sans-serif; font-size: .72rem; color: var(--terra); margin-top: 2px; }
+    .info-val  { font-family: 'Playfair Display', serif; font-size: clamp(.82rem,2.6vw,.95rem); font-weight: 600; color: var(--brown); line-height: 1.3; }
+    .info-sub  { font-family: 'Lato', sans-serif; font-size: .72rem; color: var(--terra); margin-top: 2px; }
 
-    /* Badges */
     .badge-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-    .badge {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 7px clamp(12px,3vw,17px); border-radius: 22px;
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: clamp(.82rem,2.6vw,.9rem);
-      color: var(--brown);
-    }
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 7px clamp(12px,3vw,17px); border-radius: 22px; font-family: 'Playfair Display', serif; font-style: italic; font-size: clamp(.82rem,2.6vw,.9rem); color: var(--brown); }
     .b-terra { background: rgba(217,160,129,.12); border: 1px solid rgba(217,160,129,.38); }
     .b-sage  { background: rgba(148,166,132,.14); border: 1px solid rgba(148,166,132,.35); }
 
-    /* Botón mapa */
     #btn-map {
       display: block; width: 100%; min-height: 48px;
       padding: clamp(12px,2.8vw,15px) 20px;
       border: none; border-radius: 50px;
       background: var(--terra); color: var(--cream);
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(.86rem,2.7vw,.95rem);
+      font-family: 'Playfair Display', serif; font-size: clamp(.86rem,2.7vw,.95rem);
       letter-spacing: .07em; cursor: pointer;
       box-shadow: 0 5px 22px rgba(217,160,129,.42);
       transition: background .25s, transform .22s, box-shadow .22s;
@@ -408,83 +351,24 @@
 
 
     /* ══ MODAL MAPA ════════════════════════════════════════ */
-    #map-modal {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      z-index: 100;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-    .map-bd {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(74,93,78,.72);
-      backdrop-filter: blur(7px);
-      -webkit-backdrop-filter: blur(7px);
-    }
-    .map-box {
-      position: relative; z-index: 10;
-      width: 100%; max-width: 500px;
-      background: var(--cream);
-      border-radius: 22px;
-      overflow: hidden;
-      box-shadow: 0 28px 70px rgba(107,79,59,.32);
-    }
-    .map-head {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 18px;
-      background: linear-gradient(135deg, rgba(217,160,129,.28), rgba(235,192,109,.18));
-      border-bottom: 1px solid rgba(217,160,129,.22);
-    }
+    #map-modal { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; padding: 16px; }
+    .map-bd { position: absolute; inset: 0; background: rgba(74,93,78,.72); backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); }
+    .map-box { position: relative; z-index: 10; width: 100%; max-width: 500px; background: var(--cream); border-radius: 22px; overflow: hidden; box-shadow: 0 28px 70px rgba(107,79,59,.32); }
+    .map-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: linear-gradient(135deg, rgba(217,160,129,.28), rgba(235,192,109,.18)); border-bottom: 1px solid rgba(217,160,129,.22); }
     .map-head h3 { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 600; color: var(--brown); }
     .map-head p  { font-size: .74rem; color: var(--terra); margin-top: 2px; }
-    .btn-x {
-      width: 34px; height: 34px; border-radius: 50%;
-      border: 1px solid rgba(217,160,129,.45);
-      background: rgba(217,160,129,.15);
-      color: var(--brown); font-size: 1rem; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background .2s;
-    }
+    .btn-x { width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(217,160,129,.45); background: rgba(217,160,129,.15); color: var(--brown); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s; }
     .btn-x:hover { background: rgba(217,160,129,.3); }
     .map-wrap { height: clamp(240px,45vw,320px); }
     .map-wrap iframe { display: block; width: 100%; height: 100%; border: 0; }
-    .map-foot {
-      padding: 12px 16px;
-      border-top: 1px solid rgba(217,160,129,.2);
-      display: flex; justify-content: center;
-    }
-    .a-maps {
-      display: inline-flex; align-items: center; gap: 6px; min-height: 40px;
-      font-family: 'Lato', sans-serif; font-size: .82rem;
-      color: var(--brown); text-decoration: none;
-      background: linear-gradient(135deg, rgba(217,160,129,.14), rgba(235,192,109,.14));
-      border: 1px solid rgba(217,160,129,.38);
-      padding: 8px 20px; border-radius: 22px;
-      transition: transform .2s;
-    }
+    .map-foot { padding: 12px 16px; border-top: 1px solid rgba(217,160,129,.2); display: flex; justify-content: center; }
+    .a-maps { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; font-family: 'Lato', sans-serif; font-size: .82rem; color: var(--brown); text-decoration: none; background: linear-gradient(135deg, rgba(217,160,129,.14), rgba(235,192,109,.14)); border: 1px solid rgba(217,160,129,.38); padding: 8px 20px; border-radius: 22px; transition: transform .2s; }
     .a-maps:hover { transform: translateY(-1px); }
 
 
     /* ══ FAB MÚSICA ════════════════════════════════════════ */
-    @keyframes eq {
-      0%,100% { transform: scaleY(.3); }
-      50%      { transform: scaleY(1); }
-    }
-    #fab {
-      position: fixed;
-      bottom: clamp(16px,4vw,22px); right: clamp(16px,4vw,22px);
-      z-index: 70;
-      width: 48px; height: 48px; border-radius: 50%;
-      border: none;
-      background: linear-gradient(135deg, var(--terra), var(--gold));
-      box-shadow: 0 5px 18px rgba(217,160,129,.5);
-      cursor: pointer;
-      display: none; align-items: center; justify-content: center;
-      transition: transform .22s;
-    }
+    @keyframes eq { 0%,100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+    #fab { position: fixed; bottom: clamp(16px,4vw,22px); right: clamp(16px,4vw,22px); z-index: 150; width: 48px; height: 48px; border-radius: 50%; border: none; background: linear-gradient(135deg, var(--terra), var(--gold)); box-shadow: 0 5px 18px rgba(217,160,129,.5); cursor: pointer; display: none; align-items: center; justify-content: center; transition: transform .22s; }
     #fab:hover  { transform: scale(1.12); }
     #fab:active { transform: scale(.92); }
     .eq-wrap { display: flex; align-items: flex-end; gap: 2.5px; height: 16px; }
@@ -500,36 +384,43 @@
 <body>
 
 <!-- ══════════════════════════════════════════════════════
-     PANTALLA 1 · portada.png  (toca → Pantalla 2)
+     SCROLL CONTAINER — dos slides con snap
 ══════════════════════════════════════════════════════ -->
-<div id="s1" class="screen">
-  <img class="full-img" src="public/portada.webp" alt="Baby Shower" draggable="false"/>
-  <div class="ptc-layer" id="ptc1"></div>
-  <div class="overlay"></div>
-  <div id="snd-hint" role="button">🔊 Toca para activar el sonido</div>
-  <div class="screen-content">
-    <h1 id="p-title" class="sc-title">Baby Shower</h1>
-    <p  id="p-name"  class="sc-sub">Isaac Buelvas Mier</p>
-    <div id="p-tap" class="tap-wrap">
-      <div class="ring"><div class="ring-dot"></div></div>
-      <span class="tap-label">Toca para descubrir</span>
+<div id="scroller">
+
+  <!-- ── SLIDE 1 · portada.webp ── -->
+  <div class="slide" id="s1">
+    <img class="full-img" src="public/portada.webp" alt="Baby Shower" draggable="false"/>
+    <div class="ptc-layer" id="ptc1"></div>
+    <div class="overlay"></div>
+    <div class="slide-content">
+      <h1 id="p-title" class="sc-title">Baby Shower</h1>
+      <p  id="p-name"  class="sc-sub">Isaac Buelvas Mier</p>
+      <div id="p-scroll" class="scroll-hint">
+        <div class="scroll-pill"><div class="scroll-dot"></div></div>
+        <span class="scroll-hint-label">Desliza para descubrir</span>
+      </div>
     </div>
   </div>
-</div>
+
+  <!-- ── SLIDE 2 · portada2.webp (fondo del modal) ── -->
+  <div class="slide" id="s2">
+    <img class="full-img" src="public/portada2.webp" alt="Baby Shower Isaac" draggable="false"/>
+    <div class="ptc-layer" id="ptc2"></div>
+    <div class="overlay"></div>
+  </div>
+
+</div><!-- /scroller -->
 
 
 <!-- ══════════════════════════════════════════════════════
-     PANTALLA 2 · portada2.png  (fondo difuminado del modal)
+     AVISO DE SONIDO
 ══════════════════════════════════════════════════════ -->
-<div id="s2" class="screen">
-  <img class="full-img" src="public/portada2.webp" alt="Baby Shower Isaac" draggable="false"/>
-  <div class="ptc-layer" id="ptc2"></div>
-  <div class="overlay"></div>
-</div>
+<div id="snd-hint" role="button">🔊 Toca para activar el sonido</div>
 
 
 <!-- ══════════════════════════════════════════════════════
-     MODAL INFO  (Bottom sheet mobile / card desktop)
+     MODAL INFO
 ══════════════════════════════════════════════════════ -->
 <div id="info-modal">
   <div class="info-bd" id="info-bd"></div>
@@ -539,8 +430,7 @@
     <button class="btn-close-info" id="btn-close-info" aria-label="Cerrar">✕</button>
 
     <div class="info-body">
-
-      <!-- Biberón badge -->
+      <!-- Biberón -->
       <div class="baby-badge">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 74" fill="none">
           <ellipse cx="25" cy="8" rx="8.5" ry="6.5" fill="#6B4F3B" opacity=".82"/>
@@ -555,7 +445,6 @@
         </svg>
       </div>
 
-      <!-- Estrellas -->
       <div style="margin-bottom:8px;">
         <span class="star" style="color:var(--gold);font-size:.68rem;">✦</span>
         <span class="star" style="color:var(--terra);font-size:.92rem;margin:0 10px;">✦</span>
@@ -563,31 +452,20 @@
       </div>
 
       <h2 class="t-main" style="margin-bottom:2px;">Baby Shower</h2>
-
       <div class="divider"><span style="font-size:.7rem;">🌿</span></div>
-
       <p class="t-label" style="margin-bottom:5px;">En honor a</p>
       <h3 class="t-name" style="margin-bottom:11px;">Isaac Buelvas Mier</h3>
-      <p class="t-msg" style="padding:0 4px;margin-bottom:4px;">
-        "Acompáñanos a celebrar este día tan especial"
-      </p>
-
+      <p class="t-msg" style="padding:0 4px;margin-bottom:4px;">"Acompáñanos a celebrar este día tan especial"</p>
       <div class="divider"><span style="font-size:.7rem;">⭐</span></div>
 
       <div style="margin-bottom:4px;">
         <div class="info-row">
           <span class="info-icon">📅</span>
-          <div>
-            <div class="t-label">Fecha</div>
-            <div class="info-val">Sábado · 30 Mayo · 2026</div>
-          </div>
+          <div><div class="t-label">Fecha</div><div class="info-val">Sábado · 30 Mayo · 2026</div></div>
         </div>
         <div class="info-row">
           <span class="info-icon">⏰</span>
-          <div>
-            <div class="t-label">Hora</div>
-            <div class="info-val">6:00 PM — 9:00 PM</div>
-          </div>
+          <div><div class="t-label">Hora</div><div class="info-val">6:00 PM — 9:00 PM</div></div>
         </div>
         <div class="info-row">
           <span class="info-icon">📍</span>
@@ -600,14 +478,11 @@
       </div>
 
       <div class="divider"><span style="font-size:.7rem;">🎀</span></div>
-
       <div class="badge-row" style="margin-bottom:22px;">
         <span class="badge b-terra">💰 Aporte: $20.000</span>
         <span class="badge b-sage">💌 Lluvia de sobres</span>
       </div>
-
       <button id="btn-map">📍 &nbsp; Ver Ubicación</button>
-
     </div>
   </div>
 </div>
@@ -620,10 +495,7 @@
   <div class="map-bd" id="map-bd"></div>
   <div class="map-box" id="map-box">
     <div class="map-head">
-      <div>
-        <h3>📍 Restaurante Rica Brasa</h3>
-        <p>Crisanto Luque</p>
-      </div>
+      <div><h3>📍 Restaurante Rica Brasa</h3><p>Crisanto Luque</p></div>
       <button class="btn-x" id="map-close" aria-label="Cerrar">✕</button>
     </div>
     <div class="map-wrap">
@@ -631,8 +503,7 @@
         referrerpolicy="no-referrer-when-downgrade" title="Mapa Rica Brasa"></iframe>
     </div>
     <div class="map-foot">
-      <a href="https://maps.app.goo.gl/UKRxNycPFPcKcfuZ7" target="_blank"
-         rel="noopener noreferrer" class="a-maps">
+      <a href="https://maps.app.goo.gl/UKRxNycPFPcKcfuZ7" target="_blank" rel="noopener noreferrer" class="a-maps">
         🗺️ &nbsp; Abrir en Google Maps
       </a>
     </div>
@@ -648,7 +519,6 @@
   </div>
 </button>
 
-<!-- Anchor YT -->
 <div id="yt-root" style="position:fixed;bottom:-999px;left:-999px;
   width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none;"></div>
 
@@ -657,7 +527,6 @@
      SCRIPTS
 ══════════════════════════════════════════════════════ -->
 <script>
-/* ══ Constantes ═══════════════════════════════════════ */
 const VID     = 'b9nxnU1GkTg';
 const MAP_URL = 'https://maps.google.com/maps?q=Restaurante+Rica+Brasa+Crisanto+Luque&output=embed&hl=es';
 
@@ -680,7 +549,7 @@ spawnPtc('ptc1', 22);
 spawnPtc('ptc2', 18);
 
 
-/* ══ YouTube Audio ════════════════════════════════════ */
+/* ══ MÚSICA ════════════════════════════════════════════ */
 let ytPlayer, ytApiReady = false, musicOn = false, muted = false;
 
 function loadYTApi() {
@@ -710,7 +579,7 @@ function injectFallback() {
   if (document.getElementById('yt-fb')) return;
   const f = document.createElement('iframe');
   f.id = 'yt-fb'; f.allow = 'autoplay; encrypted-media';
-  f.src = `https://www.youtube.com/embed/${VID}?autoplay=1&loop=1&playlist=${VID}&controls=0&mute=0&fs=0&rel=0&iv_load_policy=3&modestbranding=1`;
+  f.src = `https://www.youtube.com/embed/${VID}?autoplay=1&loop=1&playlist=${VID}&controls=0&mute=0&fs=0&rel=0&iv_load_policy=3`;
   f.style.cssText = 'position:fixed;bottom:-999px;left:-999px;width:1px;height:1px;opacity:0;pointer-events:none;border:0;';
   document.body.appendChild(f);
 }
@@ -719,104 +588,116 @@ function startMusic() {
   if (musicOn) return;
   musicOn = true;
   if (ytApiReady && ytPlayer) {
-    try { ytPlayer.playVideo(); ytPlayer.setVolume(68); }
-    catch(_) { injectFallback(); }
+    try { ytPlayer.playVideo(); ytPlayer.setVolume(68); } catch(_) { injectFallback(); }
   } else { injectFallback(); }
+  hideSoundHint();
   showFAB();
 }
 
 function showFAB() {
   const fab = document.getElementById('fab');
   fab.style.display = 'flex';
-  gsap.fromTo(fab, { scale:0, opacity:0 }, { scale:1, opacity:1, duration:.55, delay:.5, ease:'back.out(1.7)' });
+  gsap.fromTo(fab, { scale:0, opacity:0 }, { scale:1, opacity:1, duration:.55, delay:.3, ease:'back.out(1.7)' });
 }
 function hideSoundHint() {
   const h = document.getElementById('snd-hint');
   gsap.to(h, { opacity:0, duration:.4, onComplete: () => h.style.display = 'none' });
 }
 
-document.getElementById('snd-hint').addEventListener('click', e => {
-  e.stopPropagation(); startMusic(); hideSoundHint();
-});
+document.getElementById('snd-hint').addEventListener('click', e => { e.stopPropagation(); startMusic(); });
 
 document.getElementById('fab').addEventListener('click', e => {
   e.stopPropagation();
   muted = !muted;
-  const fab = document.getElementById('fab');
-  fab.classList.toggle('muted', muted);
+  document.getElementById('fab').classList.toggle('muted', muted);
   if (ytApiReady && ytPlayer) { muted ? ytPlayer.mute() : ytPlayer.unMute(); }
   else {
-    ['yt-fb'].forEach(id => { const el = document.getElementById(id); if(el) el.remove(); });
+    const fb = document.getElementById('yt-fb'); if (fb) fb.remove();
     if (!muted) injectFallback();
   }
 });
 
 
-/* ══ Animaciones DOMContentLoaded ════════════════════ */
+/* ══ PRIMERA INTERACCIÓN → música inmediata ═══════════
+   wheel / touchstart / keydown son gestos válidos para
+   desbloquear el autoplay de audio en todos los browsers */
+function onFirstInteraction() {
+  startMusic();
+  document.removeEventListener('wheel',      onFirstInteraction);
+  document.removeEventListener('touchstart', onFirstInteraction);
+  document.removeEventListener('keydown',    onFirstInteraction);
+}
+document.addEventListener('wheel',      onFirstInteraction, { passive: true, once: true });
+document.addEventListener('touchstart', onFirstInteraction, { passive: true, once: true });
+document.addEventListener('keydown',    onFirstInteraction, { once: true });
+
+
+/* ══ ENTRADA GSAP ════════════════════════════════════= */
 window.addEventListener('DOMContentLoaded', () => {
   loadYTApi();
 
+  /* Mostrar aviso de sonido si tras 4s no arrancó */
   setTimeout(() => {
     if (!musicOn) {
       const h = document.getElementById('snd-hint');
       h.style.display = 'flex';
       gsap.fromTo(h, { y:-12, opacity:0 }, { y:0, opacity:1, duration:.5 });
     }
-  }, 3000);
+  }, 4000);
 
-  gsap.fromTo('#s1',      { opacity:0 }, { opacity:1, duration:1.7, ease:'power2.out' });
-  gsap.fromTo('#p-title', { y:32, opacity:0 }, { y:0, opacity:1, duration:1.1, delay:.55, ease:'back.out(1.5)' });
-  gsap.fromTo('#p-name',  { y:20, opacity:0 }, { y:0, opacity:1, duration:1.0, delay:.90, ease:'power2.out' });
-  gsap.fromTo('#p-tap',   { y:14, opacity:0 }, { y:0, opacity:1, duration:.9,  delay:1.35, ease:'power2.out' });
+  gsap.fromTo('#s1 .full-img', { opacity:0 }, { opacity:1, duration:1.6, ease:'power2.out' });
+  gsap.fromTo('#p-title', { y:30, opacity:0 }, { y:0, opacity:1, duration:1.1, delay:.6,  ease:'back.out(1.5)' });
+  gsap.fromTo('#p-name',  { y:20, opacity:0 }, { y:0, opacity:1, duration:1.0, delay:.95, ease:'power2.out' });
+  gsap.fromTo('#p-scroll',{ y:14, opacity:0 }, { y:0, opacity:1, duration:.9,  delay:1.4, ease:'power2.out' });
 });
 
 
-/* ══ Transición S1 → S2 + apertura automática del modal ═ */
-let transitioning = false;
+/* ══ INTERSECTION OBSERVER — abre modal al llegar a s2 ═
+   El scroll nativo se encarga de la transición visual;
+   el observer detecta cuándo s2 es visible y abre el modal */
+let modalOpened = false;
 
-function goToS2() {
-  if (transitioning) return;
-  transitioning = true;
-  hideSoundHint();
-  startMusic();
-
-  gsap.to(['#p-title','#p-name','#p-tap'], { y:-24, opacity:0, duration:.38, stagger:.06, ease:'power2.in' });
-  gsap.to('#s1', {
-    opacity:0, scale:1.06, duration:.88, delay:.18, ease:'power2.inOut',
-    onComplete: () => {
-      document.getElementById('s1').style.display = 'none';
-      const s2 = document.getElementById('s2');
-      s2.style.display = 'flex';
-      // Pantalla 2 aparece y el modal se abre inmediatamente encima
-      gsap.fromTo(s2, { opacity:0 }, {
-        opacity:1, duration:.45, ease:'power2.out',
-        onComplete: openInfoModal   // modal abre solo, sin botón
-      });
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && entry.intersectionRatio >= 0.55 && !modalOpened) {
+      modalOpened = true;
+      /* pequeño delay para que la imagen ya esté visible */
+      setTimeout(openInfoModal, 320);
     }
   });
-}
+}, { threshold: 0.55 });
 
-document.getElementById('s1').addEventListener('click', goToS2);
-document.getElementById('s1').addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') goToS2(); });
+observer.observe(document.getElementById('s2'));
 
 
-/* ══ Modal Información ═══════════════════════════════ */
+/* ══ MODAL INFO ═══════════════════════════════════════ */
 const infoModal = document.getElementById('info-modal');
 const infoSheet = document.getElementById('info-sheet');
 
 function openInfoModal() {
+  /* Bloquear el scroll mientras el modal está abierto */
+  document.getElementById('scroller').style.overflow = 'hidden';
+
   infoModal.style.display = 'flex';
-  gsap.fromTo('.info-bd',  { opacity:0 }, { opacity:1, duration:.3 });
+  gsap.fromTo('.info-bd', { opacity:0 }, { opacity:1, duration:.35 });
+  const mobile = window.innerWidth < 600;
   gsap.fromTo(infoSheet,
-    { y: window.innerWidth < 600 ? 300 : 40, opacity:0, scale: window.innerWidth < 600 ? 1 : 0.88 },
-    { y:0, opacity:1, scale:1, duration:.45, ease:'back.out(1.5)' }
+    { y: mobile ? 320 : 40, opacity:0, scale: mobile ? 1 : 0.88 },
+    { y:0, opacity:1, scale:1, duration:.48, ease:'back.out(1.4)' }
   );
 }
 
 function closeInfoModal() {
-  const isM = window.innerWidth < 600;
-  gsap.to(infoSheet, { y: isM ? 300 : 30, opacity:0, scale: isM ? 1 : 0.88, duration:.28, ease:'power2.in' });
-  gsap.to('.info-bd', { opacity:0, duration:.28, onComplete: () => { infoModal.style.display='none'; } });
+  const mobile = window.innerWidth < 600;
+  gsap.to(infoSheet, { y: mobile ? 320 : 30, opacity:0, scale: mobile ? 1 : 0.88, duration:.28, ease:'power2.in' });
+  gsap.to('.info-bd', {
+    opacity:0, duration:.28,
+    onComplete: () => {
+      infoModal.style.display = 'none';
+      /* Restaurar scroll para que el usuario pueda volver al slide 1 */
+      document.getElementById('scroller').style.overflow = '';
+    }
+  });
 }
 
 document.getElementById('info-bd').addEventListener('click', closeInfoModal);
@@ -824,7 +705,7 @@ document.getElementById('btn-close-info').addEventListener('click', closeInfoMod
 infoSheet.addEventListener('click', e => e.stopPropagation());
 
 
-/* ══ Modal Mapa ══════════════════════════════════════ */
+/* ══ MODAL MAPA ═══════════════════════════════════════ */
 const mapModal = document.getElementById('map-modal');
 const mapBox   = document.getElementById('map-box');
 
@@ -835,7 +716,6 @@ function openMapModal() {
   gsap.fromTo('.map-bd', { opacity:0 }, { opacity:1, duration:.3 });
   gsap.fromTo(mapBox, { scale:.82, opacity:0, y:20 }, { scale:1, opacity:1, y:0, duration:.4, ease:'back.out(1.8)' });
 }
-
 function closeMapModal() {
   gsap.to(mapBox,    { scale:.9, opacity:0, duration:.22, ease:'power2.in' });
   gsap.to('.map-bd', { opacity:0, duration:.22, onComplete: () => { mapModal.style.display='none'; } });
