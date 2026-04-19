@@ -621,56 +621,24 @@ spawnPtc('ptc2', 18);
 
 
 /* ══ MÚSICA ════════════════════════════════════════════
-   Flujo aprobado por Chrome mobile y Safari:
-   1. Al cargar: player con mute:1 (autoplay muted siempre permitido)
-   2. Al tocar:  unMute() + setVolume() dentro del gesto del usuario
-      → el navegador concede audio porque el medio ya existía muted  */
-let ytPlayer = null, ytApiReady = false, musicOn = false, muted = false;
-
-function loadYTApi() {
-  const t = document.createElement('script');
-  t.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(t);
-}
-
-window.onYouTubeIframeAPIReady = function () {
-  ytApiReady = true;
-  ytPlayer = new YT.Player('yt-root', {
-    height: '1', width: '1', videoId: VID,
-    playerVars: { autoplay:1, controls:0, disablekb:1, loop:1,
-                  playlist:VID, modestbranding:1, rel:0, fs:0,
-                  iv_load_policy:3, mute:1 },
-    events: {
-      onReady: e => { try { e.target.playVideo(); } catch(_){} }
-      /* Sin onStateChange: no tocamos musicOn hasta que el usuario interactúe */
-    }
-  });
-};
+   Iframe creado sincrónicamente dentro de 'click'.
+   - pointerdown/touchstart NO son activaciones de audio
+     confiables en Android Chrome → los eliminamos.
+   - 'click' sí es una activación válida en TODOS los
+     navegadores incluyendo Android Chrome.
+   - Iframe va directo al body (sin overflow:hidden encima)
+     para que Android no lo trate como autoplay oculto.    */
+let musicOn = false, muted = false;
 
 function startMusic() {
   if (musicOn) return;
   musicOn = true;
-
-  if (ytPlayer) {
-    /* Player existe y está corriendo muted — desilenciar en gesto = permitido */
-    try { ytPlayer.unMute(); ytPlayer.setVolume(68); ytPlayer.playVideo(); } catch(_){}
-  } else if (ytApiReady) {
-    /* Race condition: API lista pero player aún no — crear en gesto */
-    ytPlayer = new YT.Player('yt-root', {
-      height: '1', width: '1', videoId: VID,
-      playerVars: { autoplay:1, controls:0, disablekb:1, loop:1,
-                    playlist:VID, modestbranding:1, rel:0, fs:0, iv_load_policy:3 },
-      events: { onReady: e => { try { e.target.setVolume(68); } catch(_){} } }
-    });
-  } else {
-    /* Fallback: iframe directo si el API no cargó */
-    const f = document.createElement('iframe');
-    f.id = 'yt-embed'; f.allow = 'autoplay; encrypted-media';
-    f.src = `https://www.youtube.com/embed/${VID}?autoplay=1&loop=1&playlist=${VID}&controls=0&mute=0&enablejsapi=1&fs=0&rel=0&iv_load_policy=3`;
-    f.style.cssText = 'width:1px;height:1px;border:0;pointer-events:none;';
-    document.getElementById('yt-root').appendChild(f);
-  }
-
+  const f = document.createElement('iframe');
+  f.id    = 'yt-embed';
+  f.allow = 'autoplay; encrypted-media';
+  f.src   = `https://www.youtube.com/embed/${VID}?autoplay=1&loop=1&playlist=${VID}&controls=0&mute=0&enablejsapi=1&fs=0&rel=0&iv_load_policy=3`;
+  f.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;border:0;pointer-events:none;opacity:0;';
+  document.body.appendChild(f);
   hideSoundHint();
   showFAB();
 }
@@ -697,29 +665,26 @@ document.getElementById('fab').addEventListener('click', e => {
   e.stopPropagation();
   muted = !muted;
   document.getElementById('fab').classList.toggle('muted', muted);
-  if (ytPlayer) { muted ? ytPlayer.mute() : ytPlayer.unMute(); }
-  else           { ytCmd(muted ? 'mute' : 'unMute'); }
+  ytCmd(muted ? 'mute' : 'unMute');
 });
 
 
 /* ══ PRIMERA INTERACCIÓN → música inmediata ═══════════
-   Gestos válidos para desbloquear autoplay de audio:
-   pointerdown, click, touchstart, keydown
-   ⚠ wheel NO es un user-activation gesture en los browsers */
+   Solo 'click' y 'keydown': son las únicas activaciones
+   que Android Chrome acepta para crear media con audio.
+   pointerdown/touchstart se eliminaron porque en Android
+   disparan antes de que el permiso de audio esté listo.  */
 function onFirstInteraction() {
   if (musicOn) return;
   startMusic();
 }
-document.addEventListener('pointerdown', onFirstInteraction, { once: true });
-document.addEventListener('click',       onFirstInteraction, { once: true });
-document.addEventListener('touchstart',  onFirstInteraction, { passive: true, once: true });
-document.addEventListener('keydown',     onFirstInteraction, { once: true });
+document.addEventListener('click',   onFirstInteraction, { once: true });
+document.addEventListener('keydown', onFirstInteraction, { once: true });
 
 
 /* ══ ENTRADA GSAP ════════════════════════════════════= */
 window.addEventListener('DOMContentLoaded', () => {
   try { router(); } catch(e) { console.warn('Router error:', e); }
-  loadYTApi();
 
   /* Mostrar aviso de sonido a los 1.5s si no arrancó solo */
   setTimeout(() => {
