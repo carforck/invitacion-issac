@@ -188,29 +188,6 @@
       100% { transform: translateY(0);    opacity: 1; }
     }
 
-    /* Aviso de sonido */
-    #snd-hint {
-      position: fixed;
-      top: 18px; left: 50%;
-      transform: translateX(-50%);
-      z-index: 200;
-      display: none;
-      align-items: center;
-      gap: 7px;
-      background: rgba(107,79,59,.78);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      color: var(--cream);
-      font-family: 'Lato', sans-serif;
-      font-size: .72rem;
-      padding: 9px 20px;
-      border-radius: 24px;
-      border: 1px solid rgba(235,192,109,.45);
-      cursor: pointer;
-      white-space: nowrap;
-      box-shadow: 0 4px 16px rgba(0,0,0,.25);
-      pointer-events: auto;
-    }
 
 
     /* ══ MODAL INFO ════════════════════════════════════════ */
@@ -427,12 +404,6 @@
 
 
 <!-- ══════════════════════════════════════════════════════
-     AVISO DE SONIDO
-══════════════════════════════════════════════════════ -->
-<div id="snd-hint" role="button">🔊 Toca para activar el sonido</div>
-
-
-<!-- ══════════════════════════════════════════════════════
      MODAL INFO
 ══════════════════════════════════════════════════════ -->
 <div id="info-modal">
@@ -636,10 +607,9 @@ function startMusic() {
   const f = document.createElement('iframe');
   f.id    = 'yt-embed';
   f.allow = 'autoplay; encrypted-media';
-  f.src   = `https://www.youtube.com/embed/${VID}?autoplay=1&loop=1&playlist=${VID}&controls=0&mute=0&enablejsapi=1&fs=0&rel=0&iv_load_policy=3`;
   f.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;border:0;pointer-events:none;opacity:0;';
-  document.body.appendChild(f);
-  hideSoundHint();
+  document.body.appendChild(f); /* iOS Safari requiere estar en el DOM antes de asignar src */
+  f.src = `https://www.youtube.com/embed/${VID}?autoplay=1&loop=1&playlist=${VID}&controls=0&mute=0&playsinline=1&enablejsapi=1&fs=0&rel=0&iv_load_policy=3`;
   showFAB();
 }
 
@@ -654,13 +624,6 @@ function showFAB() {
   fab.style.display = 'flex';
   gsap.fromTo(fab, { scale:0, opacity:0 }, { scale:1, opacity:1, duration:.55, delay:.3, ease:'back.out(1.7)' });
 }
-function hideSoundHint() {
-  const h = document.getElementById('snd-hint');
-  gsap.to(h, { opacity:0, duration:.4, onComplete: () => h.style.display = 'none' });
-}
-
-document.getElementById('snd-hint').addEventListener('click', e => { e.stopPropagation(); startMusic(); });
-
 document.getElementById('fab').addEventListener('click', e => {
   e.stopPropagation();
   muted = !muted;
@@ -686,15 +649,6 @@ document.addEventListener('touchend', onFirstInteraction, { passive: true, once:
 /* ══ ENTRADA GSAP ════════════════════════════════════= */
 window.addEventListener('DOMContentLoaded', () => {
   try { router(); } catch(e) { console.warn('Router error:', e); }
-
-  /* Mostrar aviso de sonido a los 1.5s si no arrancó solo */
-  setTimeout(() => {
-    if (!musicOn) {
-      const h = document.getElementById('snd-hint');
-      h.style.display = 'flex';
-      gsap.fromTo(h, { y:-12, opacity:0 }, { y:0, opacity:1, duration:.5 });
-    }
-  }, 1500);
 
   gsap.fromTo('#s1 .full-img', { opacity:0 }, { opacity:1, duration:1.6, ease:'power2.out' });
   gsap.fromTo('#p-title', { y:30, opacity:0 }, { y:0, opacity:1, duration:1.1, delay:.6,  ease:'back.out(1.5)' });
