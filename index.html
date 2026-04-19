@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Baby Shower · Isaac Buelvas Mier</title>
 
-  <link rel="preload" href="public/portada.webp"  as="image" type="image/webp"/>
-  <link rel="preload" href="public/portada2.webp" as="image" type="image/webp"/>
+  <script src="public/invitations.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -349,6 +348,20 @@
     #btn-map:hover  { background: var(--orange); box-shadow: 0 7px 26px rgba(255,179,133,.5); transform: translateY(-2px); }
     #btn-map:active { transform: translateY(1px); }
 
+    #btn-wpp {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; min-height: 48px; margin-top: 10px;
+      padding: clamp(12px,2.8vw,15px) 20px;
+      border: none; border-radius: 50px; text-decoration: none;
+      background: #25D366; color: #fff;
+      font-family: 'Playfair Display', serif; font-size: clamp(.86rem,2.7vw,.95rem);
+      letter-spacing: .07em; cursor: pointer;
+      box-shadow: 0 5px 22px rgba(37,211,102,.38);
+      transition: background .25s, transform .22s, box-shadow .22s;
+    }
+    #btn-wpp:hover  { background: #1ebe5d; box-shadow: 0 7px 26px rgba(37,211,102,.5); transform: translateY(-2px); }
+    #btn-wpp:active { transform: translateY(1px); }
+
 
     /* ══ MODAL MAPA ════════════════════════════════════════ */
     #map-modal { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; padding: 16px; }
@@ -390,7 +403,7 @@
 
   <!-- ── SLIDE 1 · portada.webp ── -->
   <div class="slide" id="s1">
-    <img class="full-img" src="public/portada.webp" alt="Baby Shower" draggable="false"/>
+    <img id="img-portada" class="full-img" src="public/portada.webp" alt="Baby Shower" draggable="false"/>
     <div class="ptc-layer" id="ptc1"></div>
     <div class="overlay"></div>
     <div class="slide-content">
@@ -405,7 +418,7 @@
 
   <!-- ── SLIDE 2 · portada2.webp (fondo del modal) ── -->
   <div class="slide" id="s2">
-    <img class="full-img" src="public/portada2.webp" alt="Baby Shower Isaac" draggable="false"/>
+    <img id="img-portada2" class="full-img" src="public/portada2.webp" alt="Baby Shower Isaac" draggable="false"/>
     <div class="ptc-layer" id="ptc2"></div>
     <div class="overlay"></div>
   </div>
@@ -451,38 +464,42 @@
         <span class="star" style="color:var(--gold);font-size:.68rem;">✦</span>
       </div>
 
-      <h2 class="t-main" style="margin-bottom:2px;">Baby Shower</h2>
+      <h2 id="modal-titulo" class="t-main" style="margin-bottom:2px;">Baby Shower</h2>
       <div class="divider"><span style="font-size:.7rem;">🌿</span></div>
       <p class="t-label" style="margin-bottom:5px;">En honor a</p>
-      <h3 class="t-name" style="margin-bottom:11px;">Isaac Buelvas Mier</h3>
-      <p class="t-msg" style="padding:0 4px;margin-bottom:4px;">"Acompáñanos a celebrar este día tan especial"</p>
+      <h3 id="modal-nombre" class="t-name" style="margin-bottom:11px;">Isaac Buelvas Mier</h3>
+      <p id="modal-mensaje" class="t-msg" style="padding:0 4px;margin-bottom:4px;">"Acompáñanos a celebrar este día tan especial"</p>
       <div class="divider"><span style="font-size:.7rem;">⭐</span></div>
 
       <div style="margin-bottom:4px;">
         <div class="info-row">
           <span class="info-icon">📅</span>
-          <div><div class="t-label">Fecha</div><div class="info-val">Sábado · 30 Mayo · 2026</div></div>
+          <div><div class="t-label">Fecha</div><div id="modal-fecha" class="info-val">Sábado · 30 Mayo · 2026</div></div>
         </div>
         <div class="info-row">
           <span class="info-icon">⏰</span>
-          <div><div class="t-label">Hora</div><div class="info-val">6:00 PM — 9:00 PM</div></div>
+          <div><div class="t-label">Hora</div><div id="modal-hora" class="info-val">6:00 PM — 9:00 PM</div></div>
         </div>
         <div class="info-row">
           <span class="info-icon">📍</span>
           <div>
             <div class="t-label">Lugar</div>
-            <div class="info-val">Restaurante Rica Brasa</div>
-            <div class="info-sub">Crisanto Luque</div>
+            <div id="modal-lugar" class="info-val">Restaurante Rica Brasa</div>
+            <div id="modal-lugar-sub" class="info-sub">Crisanto Luque</div>
           </div>
         </div>
       </div>
 
-      <div class="divider"><span style="font-size:.7rem;">🎀</span></div>
+      <div class="divider"><span style="font-size:.7rem;">🍼</span></div>
       <div class="badge-row" style="margin-bottom:22px;">
-        <span class="badge b-terra">💰 Aporte: $20.000</span>
-        <span class="badge b-sage">💌 Lluvia de sobres</span>
+        <span id="modal-aporte" class="badge b-terra">💰 Aporte: $20.000</span>
+        <span id="modal-sobres" class="badge b-sage">💌 Lluvia de sobres</span>
       </div>
       <button id="btn-map">📍 &nbsp; Ver Ubicación</button>
+      <a id="btn-wpp" href="#" target="_blank" rel="noopener noreferrer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+        Confirmar Asistencia
+      </a>
     </div>
   </div>
 </div>
@@ -495,7 +512,7 @@
   <div class="map-bd" id="map-bd"></div>
   <div class="map-box" id="map-box">
     <div class="map-head">
-      <div><h3>📍 Restaurante Rica Brasa</h3><p>Crisanto Luque</p></div>
+      <div><h3 id="map-nombre-lugar">📍 Restaurante Rica Brasa</h3><p id="map-sub-lugar">Crisanto Luque</p></div>
       <button class="btn-x" id="map-close" aria-label="Cerrar">✕</button>
     </div>
     <div class="map-wrap">
@@ -503,7 +520,7 @@
         referrerpolicy="no-referrer-when-downgrade" title="Mapa Rica Brasa"></iframe>
     </div>
     <div class="map-foot">
-      <a href="https://maps.app.goo.gl/UKRxNycPFPcKcfuZ7" target="_blank" rel="noopener noreferrer" class="a-maps">
+      <a id="modal-maps-link" href="https://maps.app.goo.gl/UKRxNycPFPcKcfuZ7" target="_blank" rel="noopener noreferrer" class="a-maps">
         🗺️ &nbsp; Abrir en Google Maps
       </a>
     </div>
@@ -527,8 +544,50 @@
      SCRIPTS
 ══════════════════════════════════════════════════════ -->
 <script>
-const VID     = 'b9nxnU1GkTg';
-const MAP_URL = 'https://maps.google.com/maps?q=Restaurante+Rica+Brasa+Crisanto+Luque&output=embed&hl=es';
+let VID     = 'b9nxnU1GkTg';
+let MAP_URL = 'https://maps.google.com/maps?q=Restaurante+Rica+Brasa+Crisanto+Luque&output=embed&hl=es';
+
+/* ══ HASH ROUTER ═══════════════════════════════════════ */
+function applyInvitation(data) {
+  document.getElementById('img-portada').src     = `public/${data.portada}`;
+  document.getElementById('img-portada2').src    = `public/${data.portada2}`;
+  document.getElementById('p-title').textContent = data.titulo;
+  document.getElementById('p-name').textContent  = data.nombre;
+
+  document.getElementById('modal-titulo').textContent    = data.titulo;
+  document.getElementById('modal-nombre').textContent    = data.nombre;
+  document.getElementById('modal-mensaje').textContent   = `"${data.mensaje}"`;
+  document.getElementById('modal-fecha').textContent     = data.fecha;
+  document.getElementById('modal-hora').textContent      = data.hora;
+  document.getElementById('modal-lugar').textContent     = data.lugar;
+  document.getElementById('modal-lugar-sub').textContent = data.lugarSub;
+  document.getElementById('modal-aporte').textContent    = `💰 Aporte: ${data.aporte}`;
+  document.getElementById('modal-aporte').style.display  = data.mostrarAporte ? '' : 'none';
+  document.getElementById('modal-sobres').style.display  = data.mostrarSobres ? '' : 'none';
+  document.getElementById('map-nombre-lugar').textContent = `📍 ${data.lugar}`;
+  document.getElementById('map-sub-lugar').textContent   = data.lugarSub;
+  document.getElementById('modal-maps-link').href        = data.mapsLink;
+  document.getElementById('btn-wpp').href = `https://wa.me/573105080356?text=${encodeURIComponent(data.whatsappMsg)}`;
+
+  VID     = data.videoId;
+  MAP_URL = data.mapUrl;
+  const iframe = document.getElementById('map-if');
+  if (iframe && iframe.src !== 'about:blank') iframe.src = MAP_URL;
+}
+
+function router() {
+  const hash  = window.location.hash.replace(/^#/, '').trim();
+  const valid = Object.keys(invitationsData);
+  const key   = valid.includes(hash) ? hash : 'general';
+  if (!hash || !valid.includes(hash)) history.replaceState(null, '', '#general');
+  applyInvitation(invitationsData[key]);
+}
+
+window.addEventListener('hashchange', () => {
+  router();
+  document.getElementById('scroller').scrollTop = 0;
+  modalOpened = false;
+});
 
 /* ══ Partículas ═══════════════════════════════════════ */
 const SYMS = ['🌿','⭐','🍃','✦','🌸','🦋','🌼','✨','🌱'];
@@ -634,6 +693,7 @@ document.addEventListener('keydown',     onFirstInteraction, { once: true });
 
 /* ══ ENTRADA GSAP ════════════════════════════════════= */
 window.addEventListener('DOMContentLoaded', () => {
+  router();
   loadYTApi();
 
   /* Mostrar aviso de sonido a los 1.5s si no arrancó solo */
