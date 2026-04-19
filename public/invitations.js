@@ -31,9 +31,11 @@ const invitationsData = {
     mapUrl:       'https://maps.google.com/maps?q=Restaurante+Rica+Brasa+Crisanto+Luque&output=embed&hl=es',
     mapsLink:     'https://maps.app.goo.gl/UKRxNycPFPcKcfuZ7',
     videoId:      'b9nxnU1GkTg',
+    hora:         '6:30 PM — 9:00 PM',
     mostrarAporte: false,
     mostrarSobres: false,
-    whatsappMsg:  '¡Hola! Confirmamos nuestra asistencia al Baby Shower de Isaac Buelvas Mier 🍼 el sábado 30 de mayo de 2026. ¡Con mucho amor, allá estaremos!',
+    whatsappMsg:  null,
+    mensajeFinal: 'LOS ESPERAMOS ❤️',
   },
   invitado: {
     portada:      'assets/invitado/portada.webp',
