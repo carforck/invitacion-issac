@@ -576,6 +576,7 @@ function applyInvitation(data) {
 }
 
 function router() {
+  if (typeof invitationsData === 'undefined') return;
   const hash  = window.location.hash.replace(/^#/, '').trim();
   const valid = Object.keys(invitationsData);
   const key   = valid.includes(hash) ? hash : 'general';
@@ -693,7 +694,7 @@ document.addEventListener('keydown',     onFirstInteraction, { once: true });
 
 /* ══ ENTRADA GSAP ════════════════════════════════════= */
 window.addEventListener('DOMContentLoaded', () => {
-  router();
+  try { router(); } catch(e) { console.warn('Router error:', e); }
   loadYTApi();
 
   /* Mostrar aviso de sonido a los 1.5s si no arrancó solo */
