@@ -567,7 +567,7 @@ function applyInvitation(data) {
   document.getElementById('map-nombre-lugar').textContent = `📍 ${data.lugar}`;
   document.getElementById('map-sub-lugar').textContent   = data.lugarSub;
   document.getElementById('modal-maps-link').href        = data.mapsLink;
-  document.getElementById('btn-wpp').href = `https://wa.me/573105080356?text=${encodeURIComponent(data.whatsappMsg)}`;
+  document.getElementById('btn-wpp').href = `https://wa.me/14372424629?text=${encodeURIComponent(data.whatsappMsg)}`;
 
   VID     = data.videoId;
   MAP_URL = data.mapUrl;
@@ -609,7 +609,11 @@ spawnPtc('ptc1', 22);
 spawnPtc('ptc2', 18);
 
 
-/* ══ MÚSICA ════════════════════════════════════════════ */
+/* ══ MÚSICA ════════════════════════════════════════════
+   Estrategia: YouTube arranca SILENCIADO automáticamente
+   (los navegadores permiten autoplay muted).
+   Al primer gesto del usuario se dessilencia — eso sí
+   está permitido porque ocurre dentro de un user gesture. */
 let ytPlayer, ytApiReady = false, musicOn = false, muted = false;
 
 function loadYTApi() {
@@ -622,18 +626,32 @@ window.onYouTubeIframeAPIReady = function () {
   ytApiReady = true;
   ytPlayer = new YT.Player('yt-root', {
     height: '1', width: '1', videoId: VID,
-    playerVars: { autoplay:1, controls:0, disablekb:1, loop:1, playlist:VID, modestbranding:1, rel:0, fs:0, iv_load_policy:3 },
+    playerVars: { autoplay:1, controls:0, disablekb:1, loop:1, playlist:VID,
+                  modestbranding:1, rel:0, fs:0, iv_load_policy:3, mute:1 },
     events: {
-      onReady: e => { try { e.target.playVideo(); e.target.setVolume(68); } catch(_){} },
-      onStateChange: e => {
-        if (e.data === YT.PlayerState.PLAYING && !musicOn) {
-          musicOn = true; hideSoundHint(); showFAB();
-        }
-      },
-      onError: () => injectFallback()
+      onReady: e => { try { e.target.playVideo(); } catch(_){} },
+      onError: () => {}
     }
   });
 };
+
+function startMusic() {
+  if (musicOn) return;
+  musicOn = true;
+  if (ytApiReady && ytPlayer) {
+    try {
+      ytPlayer.unMute();
+      ytPlayer.setVolume(68);
+      ytPlayer.playVideo();
+    } catch(_) {
+      injectFallback();
+    }
+  } else {
+    injectFallback();
+  }
+  hideSoundHint();
+  showFAB();
+}
 
 function injectFallback() {
   if (document.getElementById('yt-fb')) return;
@@ -642,16 +660,6 @@ function injectFallback() {
   f.src = `https://www.youtube.com/embed/${VID}?autoplay=1&loop=1&playlist=${VID}&controls=0&mute=0&fs=0&rel=0&iv_load_policy=3`;
   f.style.cssText = 'position:fixed;bottom:-999px;left:-999px;width:1px;height:1px;opacity:0;pointer-events:none;border:0;';
   document.body.appendChild(f);
-}
-
-function startMusic() {
-  if (musicOn) return;
-  musicOn = true;
-  if (ytApiReady && ytPlayer) {
-    try { ytPlayer.playVideo(); ytPlayer.setVolume(68); } catch(_) { injectFallback(); }
-  } else { injectFallback(); }
-  hideSoundHint();
-  showFAB();
 }
 
 function showFAB() {
