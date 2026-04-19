@@ -670,16 +670,17 @@ document.getElementById('fab').addEventListener('click', e => {
 
 
 /* ══ PRIMERA INTERACCIÓN → música inmediata ═══════════
-   Solo 'click' y 'keydown': son las únicas activaciones
-   que Android Chrome acepta para crear media con audio.
-   pointerdown/touchstart se eliminaron porque en Android
+   touchend: se dispara al levantar el dedo (scroll o tap)
+   y es activación válida de audio en iOS, Android y desktop.
+   pointerdown/touchstart se mantienen fuera porque en Android
    disparan antes de que el permiso de audio esté listo.  */
 function onFirstInteraction() {
   if (musicOn) return;
   startMusic();
 }
-document.addEventListener('click',   onFirstInteraction, { once: true });
-document.addEventListener('keydown', onFirstInteraction, { once: true });
+document.addEventListener('click',    onFirstInteraction, { once: true });
+document.addEventListener('keydown',  onFirstInteraction, { once: true });
+document.addEventListener('touchend', onFirstInteraction, { passive: true, once: true });
 
 
 /* ══ ENTRADA GSAP ════════════════════════════════════= */
