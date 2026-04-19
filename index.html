@@ -610,56 +610,29 @@ spawnPtc('ptc2', 18);
 
 
 /* ══ MÚSICA ════════════════════════════════════════════
-   Estrategia: YouTube arranca SILENCIADO automáticamente
-   (los navegadores permiten autoplay muted).
-   Al primer gesto del usuario se dessilencia — eso sí
-   está permitido porque ocurre dentro de un user gesture. */
-let ytPlayer, ytApiReady = false, musicOn = false, muted = false;
-
-function loadYTApi() {
-  const t = document.createElement('script');
-  t.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(t);
-}
-
-window.onYouTubeIframeAPIReady = function () {
-  ytApiReady = true;
-  ytPlayer = new YT.Player('yt-root', {
-    height: '1', width: '1', videoId: VID,
-    playerVars: { autoplay:1, controls:0, disablekb:1, loop:1, playlist:VID,
-                  modestbranding:1, rel:0, fs:0, iv_load_policy:3, mute:1 },
-    events: {
-      onReady: e => { try { e.target.playVideo(); } catch(_){} },
-      onError: () => {}
-    }
-  });
-};
+   El iframe de YouTube se crea DENTRO del gesto del usuario.
+   Así el navegador (incluyendo iOS Safari) concede permiso
+   de audio — no hay nada que "desilenciar" después. */
+let musicOn = false, muted = false;
 
 function startMusic() {
   if (musicOn) return;
   musicOn = true;
-  if (ytApiReady && ytPlayer) {
-    try {
-      ytPlayer.unMute();
-      ytPlayer.setVolume(68);
-      ytPlayer.playVideo();
-    } catch(_) {
-      injectFallback();
-    }
-  } else {
-    injectFallback();
-  }
+  const root = document.getElementById('yt-root');
+  const f    = document.createElement('iframe');
+  f.id    = 'yt-embed';
+  f.allow = 'autoplay; encrypted-media';
+  f.src   = `https://www.youtube.com/embed/${VID}?autoplay=1&loop=1&playlist=${VID}&controls=0&mute=0&enablejsapi=1&fs=0&rel=0&iv_load_policy=3`;
+  f.style.cssText = 'width:1px;height:1px;border:0;pointer-events:none;';
+  root.appendChild(f);
   hideSoundHint();
   showFAB();
 }
 
-function injectFallback() {
-  if (document.getElementById('yt-fb')) return;
-  const f = document.createElement('iframe');
-  f.id = 'yt-fb'; f.allow = 'autoplay; encrypted-media';
-  f.src = `https://www.youtube.com/embed/${VID}?autoplay=1&loop=1&playlist=${VID}&controls=0&mute=0&fs=0&rel=0&iv_load_policy=3`;
-  f.style.cssText = 'position:fixed;bottom:-999px;left:-999px;width:1px;height:1px;opacity:0;pointer-events:none;border:0;';
-  document.body.appendChild(f);
+function ytCmd(fn) {
+  const f = document.getElementById('yt-embed');
+  if (f && f.contentWindow)
+    f.contentWindow.postMessage(JSON.stringify({ event:'command', func:fn, args:[] }), '*');
 }
 
 function showFAB() {
@@ -678,11 +651,7 @@ document.getElementById('fab').addEventListener('click', e => {
   e.stopPropagation();
   muted = !muted;
   document.getElementById('fab').classList.toggle('muted', muted);
-  if (ytApiReady && ytPlayer) { muted ? ytPlayer.mute() : ytPlayer.unMute(); }
-  else {
-    const fb = document.getElementById('yt-fb'); if (fb) fb.remove();
-    if (!muted) injectFallback();
-  }
+  ytCmd(muted ? 'mute' : 'unMute');
 });
 
 
@@ -703,7 +672,6 @@ document.addEventListener('keydown',     onFirstInteraction, { once: true });
 /* ══ ENTRADA GSAP ════════════════════════════════════= */
 window.addEventListener('DOMContentLoaded', () => {
   try { router(); } catch(e) { console.warn('Router error:', e); }
-  loadYTApi();
 
   /* Mostrar aviso de sonido a los 1.5s si no arrancó solo */
   setTimeout(() => {
@@ -763,8 +731,8 @@ function closeInfoModal() {
     opacity:0, duration:.28,
     onComplete: () => {
       infoModal.style.display = 'none';
-      /* Restaurar scroll para que el usuario pueda volver al slide 1 */
       document.getElementById('scroller').style.overflow = '';
+      modalOpened = false;
     }
   });
 }
