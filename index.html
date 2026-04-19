@@ -610,9 +610,10 @@ spawnPtc('ptc2', 18);
 
 
 /* ══ MÚSICA ════════════════════════════════════════════
-   El API de YouTube se carga al inicio (solo el script).
-   El YT.Player se crea DENTRO del gesto del usuario para
-   que Chrome y Safari concedan permiso de audio. */
+   Flujo aprobado por Chrome mobile y Safari:
+   1. Al cargar: player con mute:1 (autoplay muted siempre permitido)
+   2. Al tocar:  unMute() + setVolume() dentro del gesto del usuario
+      → el navegador concede audio porque el medio ya existía muted  */
 let ytPlayer = null, ytApiReady = false, musicOn = false, muted = false;
 
 function loadYTApi() {
@@ -623,24 +624,35 @@ function loadYTApi() {
 
 window.onYouTubeIframeAPIReady = function () {
   ytApiReady = true;
+  ytPlayer = new YT.Player('yt-root', {
+    height: '1', width: '1', videoId: VID,
+    playerVars: { autoplay:1, controls:0, disablekb:1, loop:1,
+                  playlist:VID, modestbranding:1, rel:0, fs:0,
+                  iv_load_policy:3, mute:1 },
+    events: {
+      onReady: e => { try { e.target.playVideo(); } catch(_){} }
+      /* Sin onStateChange: no tocamos musicOn hasta que el usuario interactúe */
+    }
+  });
 };
 
 function startMusic() {
   if (musicOn) return;
   musicOn = true;
 
-  if (ytApiReady) {
-    /* Crear el player DENTRO del gesto → Chrome concede audio */
+  if (ytPlayer) {
+    /* Player existe y está corriendo muted — desilenciar en gesto = permitido */
+    try { ytPlayer.unMute(); ytPlayer.setVolume(68); ytPlayer.playVideo(); } catch(_){}
+  } else if (ytApiReady) {
+    /* Race condition: API lista pero player aún no — crear en gesto */
     ytPlayer = new YT.Player('yt-root', {
       height: '1', width: '1', videoId: VID,
       playerVars: { autoplay:1, controls:0, disablekb:1, loop:1,
                     playlist:VID, modestbranding:1, rel:0, fs:0, iv_load_policy:3 },
-      events: {
-        onReady: e => { try { e.target.setVolume(68); } catch(_){} }
-      }
+      events: { onReady: e => { try { e.target.setVolume(68); } catch(_){} } }
     });
   } else {
-    /* Fallback si el API aún no cargó: iframe directo */
+    /* Fallback: iframe directo si el API no cargó */
     const f = document.createElement('iframe');
     f.id = 'yt-embed'; f.allow = 'autoplay; encrypted-media';
     f.src = `https://www.youtube.com/embed/${VID}?autoplay=1&loop=1&playlist=${VID}&controls=0&mute=0&enablejsapi=1&fs=0&rel=0&iv_load_policy=3`;
