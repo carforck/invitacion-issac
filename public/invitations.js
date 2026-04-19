@@ -35,7 +35,7 @@ const invitationsData = {
     mostrarAporte: false,
     mostrarSobres: false,
     whatsappMsg:  null,
-    mensajeFinal: 'LOS ESPERAMOS ❤️',
+    mensajeFinal: 'Los esperamos ❤️',
   },
   invitado: {
     portada:      'assets/invitado/portada.webp',
